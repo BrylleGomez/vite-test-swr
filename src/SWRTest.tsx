@@ -4,12 +4,21 @@ import useSWR from "swr";
 export const SWRTest: React.FC = () => {
   // const url = "https://fakestoreapi.com/products"; // almost always 200 with data
   // const url = "https://dummy.restapiexample.com/api/v1/employees"; // occasionally returns 429, but usually 200 with data
-  const url = "http://httpstat.us/500"; // always gives 500 with no response body
+  //   const url = "http://httpstat.us/500"; // always gives 500 with no response body
+  /**
+   * Response: [RQ] failed to load: {}, Data:
+   * Retries? YES
+   */
+  // const url = "https://ballistic-western-donkey.glitch.me/status/500"; // because sometimes httpstat.us is down
+  /**
+   * Response: [RQ] Data: {"statusCode":500,"description":"Internal Server Error"}, Error: null
+   * Retries? NO
+   */
+  const url = "https://mock.codes/500"; // alternative to httpstat.us
 
   const fetcher = () =>
     fetch(url).then((res) => {
-      if (res.ok) return res.json();
-      else return res;
+      return res.json();
     });
 
   const { data, error, isLoading } = useSWR("KEY", fetcher, {
@@ -28,8 +37,18 @@ export const SWRTest: React.FC = () => {
     revalidateOnFocus: false,
   });
 
-  if (error) return <div>failed to load: {JSON.stringify(error)}</div>;
-  if (isLoading) return <div>loading...</div>;
+  if (error)
+    return (
+      <div>
+        [SWR] failed to load: {JSON.stringify(error)}, Data:{" "}
+        {JSON.stringify(data)}
+      </div>
+    );
+  if (isLoading) return <div>[SWR] loading...</div>;
 
-  return <>Data: {JSON.stringify(data)}</>;
+  return (
+    <>
+      [SWR] Data: {JSON.stringify(data)}, Error: {JSON.stringify(error)}
+    </>
+  );
 };
